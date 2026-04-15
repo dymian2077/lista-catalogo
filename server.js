@@ -4,31 +4,22 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
+// O Railway escolhe a porta e injeta aqui.
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// Tenta servir a pasta public
+// Diz ao servidor para expor a pasta "public" para a internet
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ROTA DE TESTE: Se a pasta public não existir, ele vai mostrar essa mensagem!
-app.get('/', (req, res) => {
-    res.send(`
-        <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-            <h1 style="color: green;">✅ O Servidor está vivo e conectado à internet!</h1>
-            <p>Se você está vendo esta tela, o Railway está funcionando perfeitamente.</p>
-            <p style="color: red;"><strong>O ERRO É:</strong> O servidor não conseguiu achar a sua pasta chamada "public" com o "index.html" dentro dela.</p>
-            <p>Verifique lá no seu GitHub se você criou a pasta "public" e colocou os arquivos html dentro dela!</p>
-        </div>
-    `);
-});
-
+// Configuração do Banco de Dados
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
+// Cria a tabela
 async function initDB() {
     try {
         await pool.query(`
@@ -39,21 +30,27 @@ async function initDB() {
                 whatsapp VARCHAR(50)
             );
         `);
-        console.log('✅ Banco conectado!');
+        console.log('✅ Banco conectado e pronto!');
     } catch (error) {
         console.error('❌ Erro no banco:', error);
     }
 }
 initDB();
 
-app.get('/reservas', async (req, res) => {
+// ==========================================
+// ROTAS DA API
+// ==========================================
+
+app.get('/api/reservas', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM reservas');
-        res.json(result.rows.map(r => ({ id: r.id, itemIndex: r.item_index, nome: r.nome, whatsapp: r.whatsapp })));
+        res.json(result.rows.map(r => ({
+            id: r.id, itemIndex: r.item_index, nome: r.nome, whatsapp: r.whatsapp
+        })));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/reservar', async (req, res) => {
+app.post('/api/reservar', async (req, res) => {
     const { itemIndex, nome, whatsapp } = req.body;
     try {
         await pool.query('INSERT INTO reservas (item_index, nome, whatsapp) VALUES ($1, $2, $3)', [itemIndex, nome, whatsapp]);
@@ -64,29 +61,26 @@ app.post('/reservar', async (req, res) => {
     }
 });
 
-app.post('/admin-login', (req, res) => {
+app.post('/api/admin/login', (req, res) => {
     if (req.body.password === "admin") res.json({ success: true });
     else res.status(401).json({ success: false });
 });
 
-app.get('/admin-reservas', async (req, res) => {
+app.delete('/api/admin/remover/:id', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM reservas');
-        res.json(result.rows.map(r => ({ id: r.id, itemIndex: r.item_index, nome: r.nome, whatsapp: r.whatsapp })));
+        await pool.query('DELETE FROM reservas WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/admin-remover/:id', async (req, res) => {
-    try { await pool.query('DELETE FROM reservas WHERE id = $1', [req.params.id]); res.json({ success: true }); } 
-    catch (err) { res.status(500).json({ error: err.message }); }
+app.delete('/api/admin/limpar', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM reservas');
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.delete('/admin-limpar', async (req, res) => {
-    try { await pool.query('DELETE FROM reservas'); res.json({ success: true }); } 
-    catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// A porta aberta para a rede do Railway
+// Força a escutar em 0.0.0.0 (Isso resolve o erro 502 Bad Gateway)
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Rodando na porta ${PORT}`);
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
