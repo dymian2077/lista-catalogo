@@ -257,7 +257,6 @@
 
     <script>
         let itemParaReservar = null;
-        let reservasLocais = []; // Substitui o banco de dados armazenando na memória da página
 
         const listaEnxoval = [
             { nome: "Abridor de garrafa", img: "https://images.tcdn.com.br/img/img_prod/692716/abridor_de_garrafa_multiuso_963_1_25cba8711481af6e430f5aa261a6ba42_20221107155718.jpg" },
@@ -325,19 +324,27 @@
             atualizarStatusReservas();
         }
 
-        // FUNÇÃO MODIFICADA: Aplica as reservas com base na memória local em vez de buscar no banco
-        function atualizarStatusReservas() {
-            reservasLocais.forEach(reserva => {
-                const btn = document.getElementById(`btn-${reserva.itemIndex}`);
-                const status = document.getElementById(`status-${reserva.itemIndex}`);
-                const spanNome = document.getElementById(`name-${reserva.itemIndex}`);
+        // FUNÇÃO CRÍTICA: Busca no banco de dados quem já reservou o quê
+        async function atualizarStatusReservas() {
+            try {
+                // Rota relativa
+                const res = await fetch(`/reservas`);
+                const reservas = await res.json();
 
-                if (btn && status) {
-                    btn.style.display = 'none'; // Esconde o botão
-                    status.style.display = 'block'; // Mostra o status de reservado
-                    spanNome.innerText = reserva.nome; // Nome de quem reservou
-                }
-            });
+                reservas.forEach(reserva => {
+                    const btn = document.getElementById(`btn-${reserva.itemIndex}`);
+                    const status = document.getElementById(`status-${reserva.itemIndex}`);
+                    const spanNome = document.getElementById(`name-${reserva.itemIndex}`);
+
+                    if (btn && status) {
+                        btn.style.display = 'none'; // Esconde o botão
+                        status.style.display = 'block'; // Mostra o status de reservado
+                        spanNome.innerText = reserva.nome; // Nome de quem reservou
+                    }
+                });
+            } catch (err) {
+                console.error("Erro ao sincronizar reservas:", err);
+            }
         }
 
         function abrirModal(index) {
@@ -351,7 +358,7 @@
             document.getElementById('userWhatsapp').value = '';
         }
 
-        function confirmarReserva() {
+        async function confirmarReserva() {
             const nome = document.getElementById('userName').value;
             const whatsapp = document.getElementById('userWhatsapp').value;
             const btnConfirmar = document.getElementById('btnConfirmar');
@@ -361,23 +368,33 @@
             btnConfirmar.disabled = true;
             btnConfirmar.innerText = "Enviando...";
 
-            // Simula um rápido delay e adiciona a reserva na memória local
-            setTimeout(() => {
-                reservasLocais.push({
-                    itemIndex: itemParaReservar,
-                    nome: nome,
-                    whatsapp: whatsapp
+            try {
+                // Rota relativa
+                const res = await fetch(`/reservar`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        itemIndex: itemParaReservar,
+                        nome: nome,
+                        whatsapp: whatsapp
+                    })
                 });
 
-                alert(`Obrigado, ${nome}! Presente reservado com sucesso.`);
-                fecharModal();
-                
-                // Recarrega a lista para mostrar o item como reservado no navegador atual
-                atualizarStatusReservas(); 
-                
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(`Obrigado, ${nome}! Presente reservado com sucesso.`);
+                    fecharModal();
+                    carregarProdutos(); // Recarrega a lista para mostrar o item como reservado
+                } else {
+                    alert(data.message || "Erro ao reservar.");
+                }
+            } catch (err) {
+                alert("Erro ao conectar ao servidor. Tente novamente mais tarde.");
+            } finally {
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerText = "Confirmar Reserva";
-            }, 300);
+            }
         }
 
         function copiarPix() {
@@ -411,8 +428,40 @@
 
         // Inicia a página
         carregarProdutos();
+        
+        // Atualiza a cada 30 segundos caso alguém reserve enquanto o usuário navega
+        setInterval(atualizarStatusReservas, 3000);
+        async function autoAtualizarPagina() {
+            try {
+                // Rota relativa
+                const res = await fetch(`/reservas?ts=${Date.now()}`);
+                const reservas = await res.json();
 
-        // Os SetIntervals que consultavam o banco a cada 3s e 30s foram inteiramente removidos.
+                listaEnxoval.forEach((_, index) => {
+                    const btn = document.getElementById(`btn-${index}`);
+                    const status = document.getElementById(`status-${index}`);
+                    if (btn && status) {
+                        btn.style.display = 'block';
+                        status.style.display = 'none';
+                    }
+                });
+
+                reservas.forEach(r => {
+                    const btn = document.getElementById(`btn-${r.itemIndex}`);
+                    const status = document.getElementById(`status-${r.itemIndex}`);
+                    const spanNome = document.getElementById(`name-${r.itemIndex}`);
+                    if (btn && status) {
+                        btn.style.display = 'none';
+                        status.style.display = 'block';
+                        if (spanNome) spanNome.innerText = r.nome;
+                    }
+                });
+            } catch (err) {
+                console.error("Erro na atualização:", err);
+            }
+        }
+
+        setInterval(autoAtualizarPagina, 3000); // Roda a cada 3 segundos
     </script>
 </body>
 </html>
