@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Alana & Lucas</title>
+
+    <style>
+        :root {
+            --primary: #b8916d;
+            --danger: #e63946;
+            --dark: #1d1d1d;
+            --bg: #faf9f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        #login {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        input {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover { transform: translateY(-2px); }
+
+        #login button { background: var(--primary); color: white; }
+
+        .clear {
+            background: var(--dark);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .card strong { color: var(--primary); }
+        
+        .delete {
+            background: var(--danger);
+            color: white;
+            margin-top: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🔐 Painel Admin</h1>
+
+        <div id="login">
+            <p>Acesse para gerenciar as reservas</p>
+            <input type="password" id="senha" placeholder="Digite a senha admin">
+            <button onclick="login()">Entrar no Painel</button>
+        </div>
+
+        <div id="painel" style="display:none;">
+            <div style="display: flex; gap: 10px;">
+                <button class="clear" onclick="limparTudo()">🧹 Limpar Tudo</button>
+                <button style="background:#ddd; margin-bottom: 20px;" onclick="location.reload()">🔄 Atualizar</button>
+            </div>
+            <div id="lista"></div>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados removido. Utilizando array na memória para manter o layout funcional.
+        let reservasMock = [
+            // Exemplo de como um item apareceria (você pode deixar vazio apagando a linha abaixo)
+            { id: 1, itemIndex: 0, nome: "Visitante Exemplo", whatsapp: "61999999999" }
+        ];
+
+        const listaEnxoval = [
+            "Abridor de garrafa", "Jogo de pratos", "Jogo de copos", "Jogo de panelas", "Jogo de taça",
+            "Tupperware de vidro", "Jogo de lençóis", "Travesseiros", "Fronhas", "Edredom",
+            "Jogo de toalha e rosto", "Tapete de banheiro", "Tapete de sala", "Tapete de quarto",
+            "Tapete de cozinha", "Kit de pano de prato", "Cafeteira", "Chaleira", "Escorredor de louça",
+            "Filtro de água", "Lixeira", "Espelho", "Porta shampoo", "Sanduicheira 220v", "Cesto",
+            "Panela de pressão 4,5L", "Pano de chão", "Kit de pia", "Rodo inteligente (mop)", "Jarra",
+            "Forma de bolo", "Formas", "Kit potes mantimentos", "Potes para marmitas",
+            "Cortina de pia", "Gancho de parede", "Porta papel toalha", "Escova sanitária",
+            "Tábua de vidro", "Panos de microfibra", "Fruteira de cozinha", "Extensão elétrica",
+            "Potes comida gato"
+        ];
+
+        function login() {
+            const senha = document.getElementById('senha').value;
+            
+            // Simulação de login sem backend (qualquer senha como "admin" funcionará para teste)
+            if (senha === "admin" || senha !== "") {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('painel').style.display = 'block';
+                carregarReservas();
+            } else {
+                alert("Digite uma senha para entrar.");
+            }
+        }
+
+        function carregarReservas() {
+            const lista = document.getElementById('lista');
+            
+            if (reservasMock.length === 0) {
+                lista.innerHTML = '<p style="text-align:center; color:#999;">Nenhuma reserva encontrada.</p>';
+                return;
+            }
+
+            lista.innerHTML = '';
+            reservasMock.forEach(r => {
+                const nomeItem = listaEnxoval[r.itemIndex] || "Item desconhecido";
+                
+                lista.innerHTML += `
+                    <div class="card">
+                        <strong>🎁 Presente:</strong> ${nomeItem} <br>
+                        <strong>👤 Nome:</strong> ${r.nome} <br>
+                        <strong>📱 WhatsApp:</strong> ${r.whatsapp || 'Não informado'} <br>
+                        <button class="delete" onclick="remover(${r.id})">❌ Cancelar Reserva</button>
+                    </div>
+                `;
+            });
+        }
+
+        function remover(id) {
+            if (!confirm("Tem certeza que deseja cancelar esta reserva? O item voltará a ficar disponível na lista.")) return;
+            
+            // Remove do array local em vez do banco de dados
+            reservasMock = reservasMock.filter(r => r.id !== id);
+            carregarReservas();
+        }
+
+        function limparTudo() {
+            if (!confirm("⚠️ ATENÇÃO: Isso vai apagar TODAS as reservas virtuais. Confirma?")) return;
+            
+            // Limpa o array local
+            reservasMock = [];
+            carregarReservas();
+        }
+    </script>
+</body>
+</html>

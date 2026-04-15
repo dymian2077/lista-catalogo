@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Casamento - Enxoval</title>
+
+    <style>
+        :root {
+            --primary-color: #b8916d;
+            --secondary-color: #2a9d8f;
+            --bg-color: #faf9f6;
+            --card-bg: #ffffff;
+            --text-color: #444;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 25px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 300;
+            font-size: 2.4rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* GRID */
+        .catalog {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .catalog {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* CARD ANIMADO */
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            background: #eee;
+        }
+
+        .product-card h3 {
+            margin: 10px 0 15px;
+            font-size: 1.1rem;
+        }
+
+        .buy-link {
+            display: block;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid var(--secondary-color);
+            padding: 8px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .buy-link:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-reserve {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: auto;
+            transition: 0.2s;
+        }
+
+        .btn-reserve:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .reserved-status {
+            background-color: #f5f5f5;
+            color: #888;
+            padding: 12px;
+            border-radius: 10px;
+            font-style: italic;
+            display: none;
+            margin-top: auto;
+        }
+
+        /* PIX SECTION */
+        .pix-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0 60px;
+        }
+
+        .pix-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
+        }
+
+        .pix-box img {
+            width: 180px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #eee;
+        }
+
+        .pix-chave-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        /* ANIMAÇÃO DE CORAÇÕES */
+        .heart {
+            position: fixed;
+            font-size: 24px;
+            animation: floatUp 1.5s ease-out forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 90%;
+            animation: aparecer 0.3s ease;
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Nossa Casa Nova</h1>
+        <h2>💖 Alana & Lucas 💖</h2>
+        <p class="subtitle">Escolha um ou mais itens para nos ajudar a montar o nosso lar</p>
+    </header>
+
+    <div class="pix-wrapper">
+        <div class="pix-box">
+            <h2>💖 Presente via Pix</h2>
+            <p>Você também pode contribuir com qualquer valor ✨</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=f1eefd03-c2ca-4926-9c8c-5e31218bdb8e" alt="QR Code Pix">
+            <div class="pix-info">
+                <strong>Chave Pix:</strong>
+                <div class="pix-chave-box">
+                    <span id="chavePix" style="font-size: 0.8rem;">f1eefd03-c2ca-4926-9c8c-5e31218bdb8e</span>
+                    <button onclick="copiarPix()" style="background:var(--secondary-color); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Copiar</button>
+                </div>
+            </div>
+            <span id="msgCopiado" style="display:none; color: green; font-size: 0.9rem; margin-top: 10px;">✅ Copiado!</span>
+        </div>
+    </div>
+
+    <div class="catalog" id="catalog"></div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--primary-color)">Reservar Presente</h2>
+            <p>Preencha para que possamos te agradecer!</p>
+            <input type="text" id="userName" placeholder="Seu nome" style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+            <input type="text" id="userWhatsapp" placeholder="Seu WhatsApp (Opcional)" style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
+            
+            <div style="background:#fff9f0; border:1px dashed var(--primary-color); padding:15px; margin:20px 0; font-size:0.85rem; border-radius:10px;">
+                <strong>Endereço para entrega:</strong><br>
+                Setor residencial Conjunto Nova Esperança Casa 97<br>
+                CEP: 73402353 | Planaltina DF
+            </div>
+
+            <button class="btn-reserve" id="btnConfirmar" onclick="confirmarReserva()">Confirmar Reserva</button>
+            <p style="text-align:center; margin-top:15px"><a href="#" onclick="fecharModal()" style="color:#888; text-decoration:none;">Cancelar</a></p>
+        </div>
+    </div>
+
+    <script>
+        let itemParaReservar = null;
+        let reservasLocais = []; // Substitui o banco de dados armazenando na memória da página
+
+        const listaEnxoval = [
+            { nome: "Abridor de garrafa", img: "https://images.tcdn.com.br/img/img_prod/692716/abridor_de_garrafa_multiuso_963_1_25cba8711481af6e430f5aa261a6ba42_20221107155718.jpg" },
+            { nome: "Jogo de pratos", img: "https://plus.unsplash.com/premium_photo-1714648165397-ff0ca4ec9ef4?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8am9nbyUyMGRlJTIwcHJhdG9zfGVufDB8fDB8fHww" },
+            { nome: "Jogo de copos", img: "https://images.unsplash.com/photo-1730266398566-09a38829ad2d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Sm9nbyUyMGRlJTIwY29wb3N8ZW58MHx8MHx8fDA%3D" },
+            { nome: "Jogo de panelas", img: "https://plus.unsplash.com/premium_photo-1664391825760-17aacf4cb3b4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Sm9nbyUyMGRlJTIwcGFuZWxhc3xlbnwwfHwwfHx8MA%3D%3D" },
+            { nome: "Jogo de taça", img: "https://www.eladecora.com.br/cdn/shop/files/jogo-6-tacas-bordeaux-em-cristal-650ml-325618.png?v=1740661971" },
+            { nome: "Tupperware de vidro", img: "https://i.pinimg.com/736x/1e/31/0a/1e310a4d09bd3c93ecaad206376d418e.jpg" },
+            { nome: "Jogo de lençóis", img: "https://images.unsplash.com/photo-1600994401068-9c745605ed60?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fEpvZ28lMjBkZSUyMGxlbiVDMyVBNyVDMyVCM2lzfGVufDB8fDB8fHww" },
+            { nome: "Travesseiros", img: "https://plus.unsplash.com/premium_photo-1670869816720-de59bfc2be74?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8VHJhdmVzc2Vpcm9zfGVufDB8fDB8fHww" },
+            { nome: "Fronhas", img: "https://images.unsplash.com/photo-1698746044340-ae5559412fd5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8RnJvbmhhc3xlbnwwfHwwfHx8MA%3D%3D" },
+            { nome: "Edredom", img: "https://images.unsplash.com/photo-1642026391740-fa9c57090831?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fEVkcmVkb218ZW58MHx8MHx8fDA%3D" },
+            { nome: "Jogo de toalha e rosto", img: "https://launehaus.cdn.magazord.com.br/img/2024/04/produto/66/toalha-alice-kit-com-4-ambientada-1.png?ims=fit-in/600x600/filters:fill(white)" },
+            { nome: "Tapete de banheiro", img: "https://plus.unsplash.com/premium_photo-1667673375139-882293473cfd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8VGFwZXRlJTIwZGUlMjBiYW5oZWlyb3xlbnwwfHwwfHx8MA%3D%3D" },
+            { nome: "Tapete de sala", img: "https://plus.unsplash.com/premium_photo-1683141237355-d966b653f414?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8VGFwZXRlJTIwZGUlMjBzYWxhfGVufDB8fDB8fHww" },
+            { nome: "Tapete de quarto", img: "https://images.tcdn.com.br/img/img_prod/1073554/tapete_de_quarto_3_ps_g_boho_pelo_algodo_listras_c_1_20250925101824_05039fe93bb9.jpg" },
+            { nome: "Tapete de cozinha", img: "https://down-br.img.susercontent.com/file/br-11134207-7qukw-lki90dil4uw78b" },
+            { nome: "Kit de pano de prato", img: "https://cdn.awsli.com.br/600x700/1050/1050802/produto/206058176/whatsapp-image-2023-07-25-at-14-20-30--1--1qr78lw336.jpeg" },
+            { nome: "Cafeteira", img: "https://plus.unsplash.com/premium_photo-1670333242552-01eea0e36b7e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8Q2FmZXRlaXJhfGVufDB8fDB8fHww" },
+            { nome: "Chaleira", img: "https://plus.unsplash.com/premium_photo-1723600987663-33bba551b7ce?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Q2hhbGVpcmF8ZW58MHx8MHx8fDA%3D" },
+            { nome: "Escorredor de louça", img: "https://m.media-amazon.com/images/I/71DDQxrJZzL._AC_UF350,350_QL80_.jpg" },
+            { nome: "Filtro de água", img: "https://s2-techtudo.glbimg.com/_y70yQ743aaHsS1jMmL7tZe4hCE=/0x0:1241x698/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_08fbf48bc0524877943fe86e43087e7a/internal_photos/bs/2024/P/x/E1QfmWRW2o9adBA2cwRw/header.jpeg" },
+            { nome: "Lixeira", img: "https://medlimp.com.br/wp-content/uploads/2023/02/LIXEIRA-INOX-12L-COM-PEDAL-JSN.png" },
+            { nome: "Espelho", img: "https://static.decorepronto.com.br/public/decorepronto/imagens/produtos/espelho-design-decorativo-retangular-arredondado-com-moldura-preta-67f54f88b5456.jpg" },
+            { nome: "Porta shampoo", img: "https://storage.googleapis.com/cmsapi.sistema.cim.br/C-DOGYVEDNHG7V5W/2025-06/FDVsMFq5ATEPREsHP6sn6xs1/product_detail_large_image.jpg" },
+            { nome: "Sanduicheira 220v", img: "https://a-static.mlcdn.com.br/420x420/sanduicheira-grill-eletrica-220v-110v-antiaderente-preto-be-smart/paizaostore/f25328/adad245204a74822be3ecf5db782f609.jpeg" },
+            { nome: "Cesto", img: "https://images.tcdn.com.br/img/img_prod/702656/kit_5_cestos_organizadores_multiuso_medio_branco_plastico_697_1_e8ba0cac48f9ed020638e71496f0be6c.jpg" },
+            { nome: "Panela de pressão 4,5L", img: "https://m.media-amazon.com/images/I/81P4NbJcaVS.jpg" },
+            { nome: "Pano de chão", img: "https://m.media-amazon.com/images/I/61fp0PfzejL.jpg" },
+            { nome: "Kit de pia", img: "https://down-br.img.susercontent.com/file/br-11134207-7r98o-lmnyi3y1gqbbfc" },
+            { nome: "Rodo inteligente (mop)", img: "https://down-br.img.susercontent.com/file/br-11134207-7r98o-lq0og2i7tgcj84" },
+            { nome: "Jarra", img: "https://pontaodasfabricas.cdn.magazord.com.br/img/2026/01/produto/19088/07-jarra-de-vidro-c-fio-de-ouro-lyor-1l-coracao.png?ims=600x600" },
+            { nome: "Forma de bolo", img: "https://static.casaebar.com.br/public/casaebar/imagens/produtos/forma-bolo-20-11561-nacional-552.jpg" },
+            { nome: "Formas", img: "https://espetinhodesucesso.com/wp-content/uploads/2021/11/Pode-assar-frango-em-travessa-de-vidro.jpg" },
+            { nome: "Kit potes mantimentos", img: "https://down-br.img.susercontent.com/file/br-11134207-7r98o-lrne0fujmcjx10" },
+            { nome: "Potes para marmitas", img: "https://cdn.awsli.com.br/600x1000/1936/1936038/produto/193664467/2edd5f3107.jpg" },
+            { nome: "Cortina de pia", img: "https://cdn.sistemawbuy.com.br/arquivos/70ca4ede32cfddd39c0dbeb390a791c5/produtos/64b6e257f0a7a/20230718160456-64b6e25855de4.jpg" },
+            { nome: "Gancho de parede", img: "https://cdn.awsli.com.br/2500x2500/19/19830/produto/4317964/gancho-redondo-4fl3t3cbcg.png" },
+            { nome: "Porta papel toalha", img: "https://www.nerdloja.com/cdn/shop/products/He061ea0a3c1e4bb48d05f9159a5b03517_800x.jpg?v=1692425862" },
+            { nome: "Escova sanitária", img: "https://cdn.leroymerlin.com.br/products/escova_sanitaria_de_silicone_com_suporte_1571489251_cde6_600x600.jpg" },
+            { nome: "Tábua de vidro", img: "https://cdn.awsli.com.br/274/274010/produto/291249093/ada89510f64a70355369fd9478cdd558-6kx9rz2inr.jpeg" },
+            { nome: "Panos de microfibra", img: "https://m.media-amazon.com/images/I/61ct81e5GDL.jpg" },
+            { nome: "Fruteira de cozinha", img: "https://images.tcdn.com.br/img/img_prod/895747/fruteira_de_chao_para_cozinha_3_andares_cesto_preta_plus_1029_1_8990111cf45862fd7ec80ce547864c75.jpg" },
+            { nome: "Extensão elétrica", img: "https://www.impolut.com.br/wp-content/uploads/2022/11/EXTENSAO-ELETRICA-80-CM.jpg" },
+            { nome: "Potes comida gato", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvwbvxoM3-BxzewhtK-JhdpDB4IRAj7SOKHg&s" }
+        ];
+
+        function carregarProdutos() {
+            const catalog = document.getElementById('catalog');
+            catalog.innerHTML = '';
+            listaEnxoval.forEach((prod, index) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${prod.img}" alt="${prod.nome}">
+                    <h3>${prod.nome}</h3>
+                    <a href="https://www.google.com/search?q=comprar+${prod.nome}" target="_blank" class="buy-link">🛍️ Ver onde comprar</a>
+                    <button class="btn-reserve" id="btn-${index}" onclick="abrirModal(${index})">Reservar este presente</button>
+                    <div class="reserved-status" id="status-${index}">
+                        ✅ Já reservado por <span class="reserver-name" id="name-${index}"></span>
+                    </div>
+                `;
+                catalog.appendChild(card);
+            });
+            atualizarStatusReservas();
+        }
+
+        // FUNÇÃO MODIFICADA: Aplica as reservas com base na memória local em vez de buscar no banco
+        function atualizarStatusReservas() {
+            reservasLocais.forEach(reserva => {
+                const btn = document.getElementById(`btn-${reserva.itemIndex}`);
+                const status = document.getElementById(`status-${reserva.itemIndex}`);
+                const spanNome = document.getElementById(`name-${reserva.itemIndex}`);
+
+                if (btn && status) {
+                    btn.style.display = 'none'; // Esconde o botão
+                    status.style.display = 'block'; // Mostra o status de reservado
+                    spanNome.innerText = reserva.nome; // Nome de quem reservou
+                }
+            });
+        }
+
+        function abrirModal(index) {
+            itemParaReservar = index;
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('userName').value = '';
+            document.getElementById('userWhatsapp').value = '';
+        }
+
+        function confirmarReserva() {
+            const nome = document.getElementById('userName').value;
+            const whatsapp = document.getElementById('userWhatsapp').value;
+            const btnConfirmar = document.getElementById('btnConfirmar');
+
+            if (!nome) return alert("Por favor, digite seu nome.");
+
+            btnConfirmar.disabled = true;
+            btnConfirmar.innerText = "Enviando...";
+
+            // Simula um rápido delay e adiciona a reserva na memória local
+            setTimeout(() => {
+                reservasLocais.push({
+                    itemIndex: itemParaReservar,
+                    nome: nome,
+                    whatsapp: whatsapp
+                });
+
+                alert(`Obrigado, ${nome}! Presente reservado com sucesso.`);
+                fecharModal();
+                
+                // Recarrega a lista para mostrar o item como reservado no navegador atual
+                atualizarStatusReservas(); 
+                
+                btnConfirmar.disabled = false;
+                btnConfirmar.innerText = "Confirmar Reserva";
+            }, 300);
+        }
+
+        function copiarPix() {
+            const chave = document.getElementById("chavePix").innerText;
+            navigator.clipboard.writeText(chave).then(() => {
+                document.getElementById("msgCopiado").style.display = "block";
+                animarCoracoes();
+                setTimeout(() => document.getElementById("msgCopiado").style.display = "none", 2000);
+            });
+        }
+
+        function criarCoracao(x, y) {
+            const heart = document.createElement("div");
+            heart.classList.add("heart");
+            heart.innerText = "💖";
+            heart.style.left = x + "px";
+            heart.style.top = y + "px";
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1500);
+        }
+
+        function animarCoracoes() {
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    const x = window.innerWidth / 2 + (Math.random() * 200 - 100);
+                    const y = window.innerHeight / 2 + (Math.random() * 100 - 50);
+                    criarCoracao(x, y);
+                }, i * 80);
+            }
+        }
+
+        // Inicia a página
+        carregarProdutos();
+
+        // Os SetIntervals que consultavam o banco a cada 3s e 30s foram inteiramente removidos.
+    </script>
+</body>
+</html>
