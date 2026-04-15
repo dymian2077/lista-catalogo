@@ -4,23 +4,21 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-// O Railway define a porta automaticamente através do process.env.PORT
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// Serve os arquivos da pasta 'public'
+// Serve os arquivos da pasta 'public' (seu HTML e CSS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuração do PostgreSQL (O Railway injeta a variável DATABASE_URL automaticamente)
+// Configuração do PostgreSQL do Railway
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Em produção (nuvem), o SSL geralmente é exigido
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
-// Cria a tabela automaticamente ao iniciar o servidor
+// Cria a tabela automaticamente se não existir
 async function initDB() {
     try {
         await pool.query(`
@@ -39,66 +37,88 @@ async function initDB() {
 initDB();
 
 // ==========================================
-// ROTAS DA API
+// ROTAS PARA O INDEX.HTML
 // ==========================================
 
-// 1. Buscar todas as reservas
-app.get('/api/reservas', async (req, res) => {
+// Buscar reservas ativas
+app.get('/reservas', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM reservas');
-        // Renomear item_index de volta para itemIndex para o Frontend entender
-        const reservas = result.rows.map(r => ({
-            id: r.id,
-            itemIndex: r.item_index,
-            nome: r.nome,
-            whatsapp: r.whatsapp
-        }));
-        res.json(reservas);
+        res.json(result.rows.map(r => ({
+            id: r.id, itemIndex: r.item_index, nome: r.nome, whatsapp: r.whatsapp
+        })));
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 2. Fazer uma nova reserva
-app.post('/api/reservas', async (req, res) => {
+// Criar nova reserva
+app.post('/reservar', async (req, res) => {
     const { itemIndex, nome, whatsapp } = req.body;
-    
     try {
-        const result = await pool.query(
-            'INSERT INTO reservas (item_index, nome, whatsapp) VALUES ($1, $2, $3) RETURNING id',
+        await pool.query(
+            'INSERT INTO reservas (item_index, nome, whatsapp) VALUES ($1, $2, $3)',
             [itemIndex, nome, whatsapp]
         );
-        res.json({ id: result.rows[0].id, mensagem: "Reserva concluída!" });
+        res.json({ success: true, message: "Reserva concluída!" });
     } catch (err) {
-        // Código 23505 no Postgres significa violação de chave única (UNIQUE)
         if (err.code === '23505') {
-            return res.status(400).json({ error: "Este item já foi reservado!" });
+            return res.status(400).json({ success: false, message: "Este item já foi reservado!" });
         }
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// ==========================================
+// ROTAS PARA O ADMIN.HTML
+// ==========================================
+
+// Login simples
+app.post('/admin-login', (req, res) => {
+    const { password } = req.body;
+    if (password === "admin") {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ success: false });
+    }
+});
+
+// Buscar reservas no admin
+app.get('/admin-reservas', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM reservas');
+        res.json(result.rows.map(r => ({
+            id: r.id, itemIndex: r.item_index, nome: r.nome, whatsapp: r.whatsapp
+        })));
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 3. Admin: Remover uma reserva específica
-app.delete('/api/reservas/:id', async (req, res) => {
+// Remover uma reserva específica
+app.delete('/admin-remover/:id', async (req, res) => {
     const { id } = req.params;
     try {
         await pool.query('DELETE FROM reservas WHERE id = $1', [id]);
-        res.json({ mensagem: "Reserva cancelada com sucesso!" });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 4. Admin: Limpar TODAS as reservas
-app.delete('/api/reservas', async (req, res) => {
+// Limpar banco de dados
+app.delete('/admin-limpar', async (req, res) => {
     try {
         await pool.query('DELETE FROM reservas');
-        res.json({ mensagem: "Todas as reservas foram apagadas!" });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-app.listen(PORT, () => {
+// ==========================================
+// INICIA O SERVIDOR ABERTO PARA A INTERNET ('0.0.0.0')
+// ==========================================
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });
