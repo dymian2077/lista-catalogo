@@ -1,111 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Alana & Lucas</title>
-
     <style>
-        :root {
-            --primary: #b8916d;
-            --danger: #e63946;
-            --dark: #1d1d1d;
-            --bg: #faf9f6;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg);
-            padding: 20px;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            font-weight: 300;
-            margin-bottom: 30px;
-        }
-
-        #login {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-
-        input {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            width: 100%;
-            margin: 10px 0;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        button {
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            width: 100%;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
+        :root { --primary: #b8916d; --danger: #e63946; --dark: #1d1d1d; --bg: #faf9f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; margin: 0; }
+        .container { max-width: 700px; margin: auto; }
+        h1 { text-align: center; color: var(--primary); font-weight: 300; margin-bottom: 30px; }
+        #login { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        input { padding: 12px; border-radius: 8px; border: 1px solid #ddd; width: 100%; margin: 10px 0; box-sizing: border-box; }
+        button { padding: 12px; border-radius: 8px; border: none; width: 100%; font-size: 1rem; cursor: pointer; transition: 0.2s; }
         button:hover { transform: translateY(-2px); }
-
         #login button { background: var(--primary); color: white; }
-
-        .clear {
-            background: var(--dark);
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            animation: fadeIn 0.4s ease;
-        }
-
+        .clear { background: var(--dark); color: white; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; margin: 15px 0; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .card strong { color: var(--primary); }
-        
-        .delete {
-            background: var(--danger);
-            color: white;
-            margin-top: 10px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .delete { background: var(--danger); color: white; margin-top: 10px; }
     </style>
 </head>
-
 <body>
-
     <div class="container">
         <h1>🔐 Painel Admin</h1>
-
         <div id="login">
             <p>Acesse para gerenciar as reservas</p>
             <input type="password" id="senha" placeholder="Digite a senha admin">
             <button onclick="login()">Entrar no Painel</button>
         </div>
-
         <div id="painel" style="display:none;">
             <div style="display: flex; gap: 10px;">
                 <button class="clear" onclick="limparTudo()">🧹 Limpar Tudo</button>
@@ -116,7 +38,6 @@
     </div>
 
     <script>
-        // A lista deve ser IGUAL à da index.html para os nomes baterem com os indexes
         const listaEnxoval = [
             "Abridor de garrafa", "Jogo de pratos", "Jogo de copos", "Jogo de panelas", "Jogo de taça",
             "Tupperware de vidro", "Jogo de lençóis", "Travesseiros", "Fronhas", "Edredom",
@@ -133,76 +54,53 @@
         async function login() {
             const senha = document.getElementById('senha').value;
             try {
-                // Rota relativa apontando para o próprio servidor
-                const res = await fetch(`/admin-login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const res = await fetch('/api/admin/login', {
+                    method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ password: senha })
                 });
                 const data = await res.json();
-
                 if (data.success) {
                     document.getElementById('login').style.display = 'none';
                     document.getElementById('painel').style.display = 'block';
                     carregarReservas();
-                    // Atualiza automaticamente a cada 5 segundos após logar
-                    setInterval(carregarReservas, 5000);
-                } else {
-                    alert("Senha incorreta");
-                }
-            } catch (err) {
-                alert("Erro ao conectar ao servidor. Verifique se o backend está rodando.");
-            }
+                } else { alert("Senha incorreta"); }
+            } catch (err) { alert("Erro ao conectar."); }
         }
 
         async function carregarReservas() {
+            const lista = document.getElementById('lista');
             try {
-                const res = await fetch(`/admin-reservas?ts=${Date.now()}`);
+                const res = await fetch('/api/reservas');
                 const dados = await res.json();
-                const lista = document.getElementById('lista');
                 
                 if (dados.length === 0) {
-                    lista.innerHTML = '<p style="text-align:center; color:#999;">Nenhuma reserva encontrada.</p>';
+                    lista.innerHTML = '<p style="text-align:center;">Nenhuma reserva encontrada.</p>';
                     return;
                 }
-
                 lista.innerHTML = '';
                 dados.forEach(r => {
-                    // Busca o nome do item baseado no itemIndex salvo no banco
                     const nomeItem = listaEnxoval[r.itemIndex] || "Item desconhecido";
-                    
                     lista.innerHTML += `
                         <div class="card">
                             <strong>🎁 Presente:</strong> ${nomeItem} <br>
                             <strong>👤 Nome:</strong> ${r.nome} <br>
                             <strong>📱 WhatsApp:</strong> ${r.whatsapp || 'Não informado'} <br>
                             <button class="delete" onclick="remover(${r.id})">❌ Cancelar Reserva</button>
-                        </div>
-                    `;
+                        </div>`;
                 });
-            } catch (err) {
-                console.error("Erro ao carregar reservas:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function remover(id) {
-            if (!confirm("Tem certeza que deseja cancelar esta reserva? O item voltará a ficar disponível na lista.")) return;
-            try {
-                await fetch(`/admin-remover/${id}`, { method: "DELETE" });
-                carregarReservas();
-            } catch (err) {
-                alert("Erro ao remover item.");
-            }
+            if (!confirm("Cancelar reserva?")) return;
+            await fetch(`/api/admin/remover/${id}`, { method: "DELETE" });
+            carregarReservas();
         }
 
         async function limparTudo() {
-            if (!confirm("⚠️ ATENÇÃO: Isso vai apagar TODAS as reservas do banco de dados. Confirma?")) return;
-            try {
-                await fetch(`/admin-limpar`, { method: "DELETE" });
-                carregarReservas();
-            } catch (err) {
-                alert("Erro ao limpar banco.");
-            }
+            if (!confirm("⚠️ Apagar TUDO?")) return;
+            await fetch(`/api/admin/limpar`, { method: "DELETE" });
+            carregarReservas();
         }
     </script>
 </body>
