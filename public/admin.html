@@ -116,12 +116,7 @@
     </div>
 
     <script>
-        // Banco de dados removido. Utilizando array na memória para manter o layout funcional.
-        let reservasMock = [
-            // Exemplo de como um item apareceria (você pode deixar vazio apagando a linha abaixo)
-            { id: 1, itemIndex: 0, nome: "Visitante Exemplo", whatsapp: "61999999999" }
-        ];
-
+        // A lista deve ser IGUAL à da index.html para os nomes baterem com os indexes
         const listaEnxoval = [
             "Abridor de garrafa", "Jogo de pratos", "Jogo de copos", "Jogo de panelas", "Jogo de taça",
             "Tupperware de vidro", "Jogo de lençóis", "Travesseiros", "Fronhas", "Edredom",
@@ -135,56 +130,79 @@
             "Potes comida gato"
         ];
 
-        function login() {
+        async function login() {
             const senha = document.getElementById('senha').value;
-            
-            // Simulação de login sem backend (qualquer senha como "admin" funcionará para teste)
-            if (senha === "admin" || senha !== "") {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('painel').style.display = 'block';
-                carregarReservas();
-            } else {
-                alert("Digite uma senha para entrar.");
+            try {
+                // Rota relativa apontando para o próprio servidor
+                const res = await fetch(`/admin-login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: senha })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('painel').style.display = 'block';
+                    carregarReservas();
+                    // Atualiza automaticamente a cada 5 segundos após logar
+                    setInterval(carregarReservas, 5000);
+                } else {
+                    alert("Senha incorreta");
+                }
+            } catch (err) {
+                alert("Erro ao conectar ao servidor. Verifique se o backend está rodando.");
             }
         }
 
-        function carregarReservas() {
-            const lista = document.getElementById('lista');
-            
-            if (reservasMock.length === 0) {
-                lista.innerHTML = '<p style="text-align:center; color:#999;">Nenhuma reserva encontrada.</p>';
-                return;
-            }
-
-            lista.innerHTML = '';
-            reservasMock.forEach(r => {
-                const nomeItem = listaEnxoval[r.itemIndex] || "Item desconhecido";
+        async function carregarReservas() {
+            try {
+                const res = await fetch(`/admin-reservas?ts=${Date.now()}`);
+                const dados = await res.json();
+                const lista = document.getElementById('lista');
                 
-                lista.innerHTML += `
-                    <div class="card">
-                        <strong>🎁 Presente:</strong> ${nomeItem} <br>
-                        <strong>👤 Nome:</strong> ${r.nome} <br>
-                        <strong>📱 WhatsApp:</strong> ${r.whatsapp || 'Não informado'} <br>
-                        <button class="delete" onclick="remover(${r.id})">❌ Cancelar Reserva</button>
-                    </div>
-                `;
-            });
+                if (dados.length === 0) {
+                    lista.innerHTML = '<p style="text-align:center; color:#999;">Nenhuma reserva encontrada.</p>';
+                    return;
+                }
+
+                lista.innerHTML = '';
+                dados.forEach(r => {
+                    // Busca o nome do item baseado no itemIndex salvo no banco
+                    const nomeItem = listaEnxoval[r.itemIndex] || "Item desconhecido";
+                    
+                    lista.innerHTML += `
+                        <div class="card">
+                            <strong>🎁 Presente:</strong> ${nomeItem} <br>
+                            <strong>👤 Nome:</strong> ${r.nome} <br>
+                            <strong>📱 WhatsApp:</strong> ${r.whatsapp || 'Não informado'} <br>
+                            <button class="delete" onclick="remover(${r.id})">❌ Cancelar Reserva</button>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Erro ao carregar reservas:", err);
+            }
         }
 
-        function remover(id) {
+        async function remover(id) {
             if (!confirm("Tem certeza que deseja cancelar esta reserva? O item voltará a ficar disponível na lista.")) return;
-            
-            // Remove do array local em vez do banco de dados
-            reservasMock = reservasMock.filter(r => r.id !== id);
-            carregarReservas();
+            try {
+                await fetch(`/admin-remover/${id}`, { method: "DELETE" });
+                carregarReservas();
+            } catch (err) {
+                alert("Erro ao remover item.");
+            }
         }
 
-        function limparTudo() {
-            if (!confirm("⚠️ ATENÇÃO: Isso vai apagar TODAS as reservas virtuais. Confirma?")) return;
-            
-            // Limpa o array local
-            reservasMock = [];
-            carregarReservas();
+        async function limparTudo() {
+            if (!confirm("⚠️ ATENÇÃO: Isso vai apagar TODAS as reservas do banco de dados. Confirma?")) return;
+            try {
+                await fetch(`/admin-limpar`, { method: "DELETE" });
+                carregarReservas();
+            } catch (err) {
+                alert("Erro ao limpar banco.");
+            }
         }
     </script>
 </body>
