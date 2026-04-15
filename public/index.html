@@ -1,218 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Casamento - Enxoval</title>
-
+    <title>Lista de Casamento</title>
     <style>
-        :root {
-            --primary-color: #b8916d;
-            --secondary-color: #2a9d8f;
-            --bg-color: #faf9f6;
-            --card-bg: #ffffff;
-            --text-color: #444;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding: 25px 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        h1 {
-            color: var(--primary-color);
-            font-weight: 300;
-            font-size: 2.4rem;
-            margin: 0;
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            font-style: italic;
-            color: #999;
-            margin-top: 5px;
-        }
-
-        /* GRID */
-        .catalog {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        @media (min-width: 768px) {
-            .catalog {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        /* CARD ANIMADO */
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 18px;
-            padding: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            background: #eee;
-        }
-
-        .product-card h3 {
-            margin: 10px 0 15px;
-            font-size: 1.1rem;
-        }
-
-        .buy-link {
-            display: block;
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-            text-decoration: none;
-            font-size: 0.9rem;
-            border: 1px solid var(--secondary-color);
-            padding: 8px;
-            border-radius: 6px;
-            transition: 0.2s;
-        }
-
-        .buy-link:hover {
-            background: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-reserve {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1rem;
-            margin-top: auto;
-            transition: 0.2s;
-        }
-
-        .btn-reserve:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .reserved-status {
-            background-color: #f5f5f5;
-            color: #888;
-            padding: 12px;
-            border-radius: 10px;
-            font-style: italic;
-            display: none;
-            margin-top: auto;
-        }
-
-        /* PIX SECTION */
-        .pix-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 40px 0 60px;
-        }
-
-        .pix-box {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
-        }
-
-        .pix-box img {
-            width: 180px;
-            margin: 20px 0;
-            border-radius: 10px;
-            border: 1px solid #eee;
-        }
-
-        .pix-chave-box {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f5f5f5;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        /* ANIMAÇÃO DE CORAÇÕES */
-        .heart {
-            position: fixed;
-            font-size: 24px;
-            animation: floatUp 1.5s ease-out forwards;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
-        }
-
-        /* MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 35px;
-            border-radius: 20px;
-            max-width: 420px;
-            width: 90%;
-            animation: aparecer 0.3s ease;
-        }
-
-        @keyframes aparecer {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        :root { --primary-color: #b8916d; --secondary-color: #2a9d8f; --bg-color: #faf9f6; --card-bg: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: #444; margin: 0; padding: 20px; }
+        header { text-align: center; margin-bottom: 25px; padding: 25px 15px; border-bottom: 1px solid #eee; }
+        h1 { color: var(--primary-color); font-weight: 300; font-size: 2.4rem; margin: 0; }
+        .subtitle { font-style: italic; color: #999; margin-top: 5px; }
+        .catalog { display: grid; grid-template-columns: 1fr; gap: 30px; max-width: 1100px; margin: 0 auto; }
+        @media (min-width: 768px) { .catalog { grid-template-columns: repeat(3, 1fr); } }
+        .product-card { background: var(--card-bg); border-radius: 18px; padding: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.06); text-align: center; display: flex; flex-direction: column; transition: 0.3s; }
+        .product-card:hover { transform: translateY(-8px); }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; }
+        .buy-link { display: block; margin-bottom: 15px; color: var(--secondary-color); text-decoration: none; border: 1px solid var(--secondary-color); padding: 8px; border-radius: 6px; transition: 0.2s; }
+        .buy-link:hover { background: var(--secondary-color); color: white; }
+        .btn-reserve { background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; font-size: 1rem; margin-top: auto; transition: 0.2s; }
+        .reserved-status { background-color: #f5f5f5; color: #888; padding: 12px; border-radius: 10px; font-style: italic; display: none; margin-top: auto; }
+        .pix-wrapper { display: flex; justify-content: center; margin: 40px 0 60px; }
+        .pix-box { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 400px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.06); }
+        .pix-box img { width: 180px; margin: 20px 0; border-radius: 10px; border: 1px solid #eee; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 35px; border-radius: 20px; max-width: 420px; width: 90%; }
+        .modal input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
     </style>
 </head>
-
 <body>
-
     <header>
         <h1>Nossa Casa Nova</h1>
         <h2>💖 Alana & Lucas 💖</h2>
@@ -222,16 +37,9 @@
     <div class="pix-wrapper">
         <div class="pix-box">
             <h2>💖 Presente via Pix</h2>
-            <p>Você também pode contribuir com qualquer valor ✨</p>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=f1eefd03-c2ca-4926-9c8c-5e31218bdb8e" alt="QR Code Pix">
-            <div class="pix-info">
-                <strong>Chave Pix:</strong>
-                <div class="pix-chave-box">
-                    <span id="chavePix" style="font-size: 0.8rem;">f1eefd03-c2ca-4926-9c8c-5e31218bdb8e</span>
-                    <button onclick="copiarPix()" style="background:var(--secondary-color); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Copiar</button>
-                </div>
-            </div>
-            <span id="msgCopiado" style="display:none; color: green; font-size: 0.9rem; margin-top: 10px;">✅ Copiado!</span>
+            <p><strong>Chave:</strong> <span id="chavePix">f1eefd03-c2ca-4926-9c8c-5e31218bdb8e</span></p>
+            <button onclick="copiarPix()" style="background:var(--secondary-color); color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Copiar Chave</button>
         </div>
     </div>
 
@@ -240,16 +48,8 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <h2 style="color:var(--primary-color)">Reservar Presente</h2>
-            <p>Preencha para que possamos te agradecer!</p>
-            <input type="text" id="userName" placeholder="Seu nome" style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-            <input type="text" id="userWhatsapp" placeholder="Seu WhatsApp (Opcional)" style="width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:10px; box-sizing:border-box;">
-            
-            <div style="background:#fff9f0; border:1px dashed var(--primary-color); padding:15px; margin:20px 0; font-size:0.85rem; border-radius:10px;">
-                <strong>Endereço para entrega:</strong><br>
-                Setor residencial Conjunto Nova Esperança Casa 97<br>
-                CEP: 73402353 | Planaltina DF
-            </div>
-
+            <input type="text" id="userName" placeholder="Seu nome">
+            <input type="text" id="userWhatsapp" placeholder="Seu WhatsApp (Opcional)">
             <button class="btn-reserve" id="btnConfirmar" onclick="confirmarReserva()">Confirmar Reserva</button>
             <p style="text-align:center; margin-top:15px"><a href="#" onclick="fecharModal()" style="color:#888; text-decoration:none;">Cancelar</a></p>
         </div>
@@ -308,43 +108,18 @@
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
             listaEnxoval.forEach((prod, index) => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.innerHTML = `
-                    <img src="${prod.img}" alt="${prod.nome}">
-                    <h3>${prod.nome}</h3>
-                    <a href="https://www.google.com/search?q=comprar+${prod.nome}" target="_blank" class="buy-link">🛍️ Ver onde comprar</a>
-                    <button class="btn-reserve" id="btn-${index}" onclick="abrirModal(${index})">Reservar este presente</button>
-                    <div class="reserved-status" id="status-${index}">
-                        ✅ Já reservado por <span class="reserver-name" id="name-${index}"></span>
-                    </div>
-                `;
-                catalog.appendChild(card);
+                catalog.innerHTML += `
+                    <div class="product-card">
+                        <img src="${prod.img}" alt="${prod.nome}">
+                        <h3>${prod.nome}</h3>
+                        <a href="https://www.google.com/search?q=comprar+${prod.nome}" target="_blank" class="buy-link">🛍️ Onde comprar</a>
+                        <button class="btn-reserve" id="btn-${index}" onclick="abrirModal(${index})">Reservar presente</button>
+                        <div class="reserved-status" id="status-${index}">
+                            ✅ Reservado por <span id="name-${index}"></span>
+                        </div>
+                    </div>`;
             });
-            atualizarStatusReservas();
-        }
-
-        // FUNÇÃO CRÍTICA: Busca no banco de dados quem já reservou o quê
-        async function atualizarStatusReservas() {
-            try {
-                // Rota relativa
-                const res = await fetch(`/reservas`);
-                const reservas = await res.json();
-
-                reservas.forEach(reserva => {
-                    const btn = document.getElementById(`btn-${reserva.itemIndex}`);
-                    const status = document.getElementById(`status-${reserva.itemIndex}`);
-                    const spanNome = document.getElementById(`name-${reserva.itemIndex}`);
-
-                    if (btn && status) {
-                        btn.style.display = 'none'; // Esconde o botão
-                        status.style.display = 'block'; // Mostra o status de reservado
-                        spanNome.innerText = reserva.nome; // Nome de quem reservou
-                    }
-                });
-            } catch (err) {
-                console.error("Erro ao sincronizar reservas:", err);
-            }
+            atualizarReservas();
         }
 
         function abrirModal(index) {
@@ -354,114 +129,56 @@
 
         function fecharModal() {
             document.getElementById('modal').style.display = 'none';
-            document.getElementById('userName').value = '';
-            document.getElementById('userWhatsapp').value = '';
         }
 
         async function confirmarReserva() {
             const nome = document.getElementById('userName').value;
-            const whatsapp = document.getElementById('userWhatsapp').value;
-            const btnConfirmar = document.getElementById('btnConfirmar');
-
-            if (!nome) return alert("Por favor, digite seu nome.");
-
-            btnConfirmar.disabled = true;
-            btnConfirmar.innerText = "Enviando...";
-
+            const zap = document.getElementById('userWhatsapp').value;
+            if (!nome) return alert("Digite seu nome!");
+            
+            document.getElementById('btnConfirmar').innerText = "Enviando...";
             try {
-                // Rota relativa
-                const res = await fetch(`/reservar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        itemIndex: itemParaReservar,
-                        nome: nome,
-                        whatsapp: whatsapp
-                    })
+                const res = await fetch('/api/reservar', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemIndex: itemParaReservar, nome: nome, whatsapp: zap })
                 });
-
                 const data = await res.json();
-
-                if (data.success) {
-                    alert(`Obrigado, ${nome}! Presente reservado com sucesso.`);
+                if(data.success) {
+                    alert("Reserva concluída!");
                     fecharModal();
-                    carregarProdutos(); // Recarrega a lista para mostrar o item como reservado
-                } else {
-                    alert(data.message || "Erro ao reservar.");
-                }
-            } catch (err) {
-                alert("Erro ao conectar ao servidor. Tente novamente mais tarde.");
-            } finally {
-                btnConfirmar.disabled = false;
-                btnConfirmar.innerText = "Confirmar Reserva";
-            }
+                    atualizarReservas();
+                } else { alert(data.message); }
+            } catch (err) { alert("Erro de conexão."); }
+            document.getElementById('btnConfirmar').innerText = "Confirmar Reserva";
         }
 
-        function copiarPix() {
-            const chave = document.getElementById("chavePix").innerText;
-            navigator.clipboard.writeText(chave).then(() => {
-                document.getElementById("msgCopiado").style.display = "block";
-                animarCoracoes();
-                setTimeout(() => document.getElementById("msgCopiado").style.display = "none", 2000);
-            });
-        }
-
-        function criarCoracao(x, y) {
-            const heart = document.createElement("div");
-            heart.classList.add("heart");
-            heart.innerText = "💖";
-            heart.style.left = x + "px";
-            heart.style.top = y + "px";
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1500);
-        }
-
-        function animarCoracoes() {
-            for (let i = 0; i < 12; i++) {
-                setTimeout(() => {
-                    const x = window.innerWidth / 2 + (Math.random() * 200 - 100);
-                    const y = window.innerHeight / 2 + (Math.random() * 100 - 50);
-                    criarCoracao(x, y);
-                }, i * 80);
-            }
-        }
-
-        // Inicia a página
-        carregarProdutos();
-        
-        // Atualiza a cada 30 segundos caso alguém reserve enquanto o usuário navega
-        setInterval(atualizarStatusReservas, 3000);
-        async function autoAtualizarPagina() {
+        async function atualizarReservas() {
             try {
-                // Rota relativa
-                const res = await fetch(`/reservas?ts=${Date.now()}`);
+                const res = await fetch('/api/reservas');
                 const reservas = await res.json();
-
-                listaEnxoval.forEach((_, index) => {
-                    const btn = document.getElementById(`btn-${index}`);
-                    const status = document.getElementById(`status-${index}`);
-                    if (btn && status) {
-                        btn.style.display = 'block';
-                        status.style.display = 'none';
-                    }
+                
+                listaEnxoval.forEach((_, i) => {
+                    const b = document.getElementById(`btn-${i}`);
+                    const s = document.getElementById(`status-${i}`);
+                    if(b && s) { b.style.display = 'block'; s.style.display = 'none'; }
                 });
 
                 reservas.forEach(r => {
-                    const btn = document.getElementById(`btn-${r.itemIndex}`);
-                    const status = document.getElementById(`status-${r.itemIndex}`);
-                    const spanNome = document.getElementById(`name-${r.itemIndex}`);
-                    if (btn && status) {
-                        btn.style.display = 'none';
-                        status.style.display = 'block';
-                        if (spanNome) spanNome.innerText = r.nome;
-                    }
+                    const b = document.getElementById(`btn-${r.itemIndex}`);
+                    const s = document.getElementById(`status-${r.itemIndex}`);
+                    const n = document.getElementById(`name-${r.itemIndex}`);
+                    if(b && s) { b.style.display = 'none'; s.style.display = 'block'; n.innerText = r.nome; }
                 });
-            } catch (err) {
-                console.error("Erro na atualização:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        setInterval(autoAtualizarPagina, 3000); // Roda a cada 3 segundos
+        function copiarPix() {
+            navigator.clipboard.writeText(document.getElementById("chavePix").innerText);
+            alert("Chave Copiada!");
+        }
+
+        carregarProdutos();
+        setInterval(atualizarReservas, 5000);
     </script>
 </body>
 </html>
